@@ -1,51 +1,42 @@
-# From Andrzej Szelachowski's ~/.bash_profile:
+# Add `~/bin` to the `$PATH`
+export PATH="$HOME/bin:$PATH"
 
+# Load the shell dotfiles, and then some:
+# * ~/.path can be used to extend `$PATH`.
+# * ~/.extra can be used for other settings you don’t want to commit.
+for file in ~/.rc/.{path,bash_prompt,exports,aliases,functions,extra}; do
+  [ -r "$file" ] && [ -f "$file" ] && source "$file"
+done
+unset file
 
-#  Note that a variable may require special treatment
-#+ if it will be exported.
+# Bash editing mode like vi
+set -o vi
 
-DARKGRAY='\e[1;30m'
-LIGHTRED='\e[1;31m'
-GREEN='\e[32m'
-YELLOW='\e[1;33m'
-LIGHTBLUE='\e[1;34m'
-NC='\e[m'
+# Case-insensitive globbing (used in pathname expansion)
+shopt -s nocaseglob
 
-PCT="\`if [[ \$EUID -eq 0 ]]; then T='$LIGHTRED' ; else T='$LIGHTBLUE'; fi; 
-echo \$T \`"
+# Append to the Bash history file, rather than overwriting it
+shopt -s histappend
 
-#  For "literal" command substitution to be assigned to a variable,
-#+ use escapes and double quotes:
-#+       PCT="\` ... \`" . . .
-#  Otherwise, the value of PCT variable is assigned only once,
-#+ when the variable is exported/read from .bash_profile,
-#+ and it will not change afterwards even if the user ID changes.
+# Autocorrect typos in path names when using `cd`
+shopt -s cdspell
 
+# Enable some Bash 4 features when possible:
+# * `autocd`, e.g. `**/qux` will enter `./foo/bar/baz/qux`
+# * Recursive globbing, e.g. `echo **/*.txt`
+for option in autocd globstar; do
+  shopt -s "$option" 2> /dev/null
+done
 
-PS1="\n$GREEN[\w] \n$DARKGRAY($PCT\t$DARKGRAY)-($PCT\u$DARKGRAY)-($PCT\!
-$DARKGRAY)$YELLOW-> $NC"
+# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
+[ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh
 
-#  Escape a variables whose value changes:
-#        if [[ \$EUID -eq 0 ]],
-#  Otherwise the value of the EUID variable will be assigned only once,
-#+ as above.
+# Add tab completion for `defaults read|write NSGlobalDomain`
+# You could just use `-g` instead, but I like being explicit
+complete -W "NSGlobalDomain" defaults
 
-#  When a variable is assigned, it should be called escaped:
-#+       echo \$T,
-#  Otherwise the value of the T variable is taken from the moment the PCT 
-#+ variable is exported/read from .bash_profile.
-#  So, in this example it would be null.
+# Add `killall` tab completion for common apps
+complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari iTunes SystemUIServer Terminal Twitter" killall
 
-#  When a variable's value contains a semicolon it should be strong quoted:
-#        T='$LIGHTRED',
-#  Otherwise, the semicolon will be interpreted as a command separator.
-
-
-#  Variables PCT and PS1 can be merged into a new PS1 variable:
-
-PS1="\`if [[ \$EUID -eq 0 ]]; then PCT='$LIGHTRED';
-else PCT='$LIGHTBLUE'; fi; 
-echo '\n$GREEN[\w] \n$DARKGRAY('\$PCT'\t$DARKGRAY)-\
-('\$PCT'\u$DARKGRAY)-('\$PCT'\!$DARKGRAY)$YELLOW-> $NC'\`"
-
-# The trick is to use strong quoting for parts of old PS1 variable.
+# If possible, add tab completion for many more commands
+[ -f /etc/bash_completion ] && source /etc/bash_completion

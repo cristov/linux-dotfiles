@@ -1,6 +1,4 @@
-# =============================================================== #
-#
-# PERSONAL $HOME/.bashrc FILE for bash-3.0 (or later)
+# .bashrSONAL $HOME/.bashrc FILE for bash-3.0 (or later)
 # By Emmanuel Rouat [no-email]
 #
 # Last modified: Tue Nov 20 22:04:47 CET 2012
@@ -54,33 +52,6 @@ fi
 #+ troublesome) - however this code seems to work in a majority
 #+ of cases.
 #--------------------------------------------------------------
-
-function get_xserver ()
-{
-    case $TERM in
-        xterm )
-            XSERVER=$(who am i | awk '{print $NF}' | tr -d ')''(' )
-            # Ane-Pieter Wieringa suggests the following alternative:
-            #  I_AM=$(who am i)
-            #  SERVER=${I_AM#*(}
-            #  SERVER=${SERVER%*)}
-            XSERVER=${XSERVER%%:*}
-            ;;
-            aterm | rxvt)
-            # Find some code that works here. ...
-            ;;
-    esac
-}
-
-if [ -z ${DISPLAY:=""} ]; then
-    get_xserver
-    if [[ -z ${XSERVER}  || ${XSERVER} == $(hostname) ||
-       ${XSERVER} == "unix" ]]; then
-          DISPLAY=":0.0"          # Display on local host.
-    else
-       DISPLAY=${XSERVER}:0.0     # Display on remote host.
-    fi
-fi
 
 export DISPLAY
 
@@ -921,3 +892,14 @@ complete -F _killall killall killps
 # mode:shell-script
 # sh-shell:bash
 # End:
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+
